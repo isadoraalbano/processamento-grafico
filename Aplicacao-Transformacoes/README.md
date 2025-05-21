@@ -1,2 +1,2 @@
 # processamento-grafico
-Repositório das entregas da disciplina de Processamento Gráfico
+Trabalho M2 - Aplicação de Tranformações
