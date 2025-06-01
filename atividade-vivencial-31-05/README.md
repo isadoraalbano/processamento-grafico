@@ -1,2 +1,4 @@
 # processamento-grafico
-Trabalho M2 - Aplicação de Tranformações
+Atividade Vivencial 31/05
+Isadora Albano
+Nathaly Loggiovini
