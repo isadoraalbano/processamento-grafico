@@ -2,4 +2,4 @@
 ---
 Isadora Albano e Nathaly Loggiovini
 ---
-[➡️ Atividades vivencial 31/05](../src/AtividadesVivenciais/AtividadeVivencial3105.cpp)
+[➡️ Atividade vivencial 31/05](../src/AtividadesVivenciais/AtividadeVivencial3105.cpp)
