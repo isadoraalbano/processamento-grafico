@@ -46,6 +46,9 @@ include_directories(${glm_SOURCE_DIR})
 set(EXERCISES
     Transformacoes/Parte1
     Transformacoes/Parte2
+    AtividadesVivenciais/AtividadeVivencial3105
+    JogoDasCores/M3JogoCores
+    Texturizacoes/Texturizacoes
 )
 
 add_compile_options(-Wno-pragmas)
