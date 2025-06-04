@@ -19,7 +19,7 @@ Trabalho de aplicação de transformações
 
 Trabalho Jogo das Cores
 
-[➡️ Jogo das cores](./src/Jogo-Cores/)
+[➡️ Jogo das cores](./src/JogoDasCores/)
 
 ---
 
