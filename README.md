@@ -1,7 +1,7 @@
 # processamento-grafico
 Repositório das entregas da disciplina de Processamento Gráfico
 
-## Entregas tividades Vivenciais
+## Entregas Atividades Vivenciais
 
 [➡️ Atividades vivenciais](./src/AtividadesVivenciais/)
 
