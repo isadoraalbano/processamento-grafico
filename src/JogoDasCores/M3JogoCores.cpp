@@ -73,7 +73,7 @@ int main()
 	glfwInit();
 
 	// Criação da janela GLFW
-	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Jogo das cores! ❤️🩷🧡💛💚", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Jogo das cores! Isadora Albano ❤️🩷🧡💛💚", nullptr, nullptr);
 	glfwMakeContextCurrent(window);
 
 	// Registro das funções de callback
@@ -98,7 +98,6 @@ int main()
 
 	GLuint shaderID = setupShader();
 	GLuint VAO = createQuad();
-	reiniciarJogo();
 
 	glUseProgram(shaderID);
 	GLint colorLoc = glGetUniformLocation(shaderID, "inputColor");
@@ -161,7 +160,6 @@ void validaFimJogo()
 		if (!allEliminated) break;
 	}
 	if (allEliminated) {
-		cout << "FIM DE JOGO - Pontuacao final: " << scoreFinal << ", Tentativas: " << tentativas << endl;
 		reiniciarJogo();
 	}
 };
@@ -266,6 +264,7 @@ void eliminarSimilares(float tolerancia)
 
 void reiniciarJogo()
 {
+	cout << "FIM DE JOGO - Pontuacao final: " << scoreFinal << ", Tentativas: " << tentativas << endl;
 	scoreFinal = 0;
 	tentativas = 0;
 	for (int i = 0; i < ROWS; i++)
