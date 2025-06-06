@@ -7,7 +7,7 @@ Repositório das entregas da disciplina de Processamento Gráfico
 
 ---
 
-## M2 - Tranformações
+## M2 - Transformações
 
 Trabalho de aplicação de transformações
 
