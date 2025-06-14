@@ -5,6 +5,10 @@ Repositório das entregas da disciplina de Processamento Gráfico
 
 [➡️ Atividades vivenciais](./src/AtividadesVivenciais/)
 
+### Atividade 31/05
+[➡️ Atividades vivencial 31/05](./src/AtividadesVivenciais/AtividadeVivencial3105)
+[➡️ Atividades vivencial 14/06](./src/AtividadesVivenciais/AtividadeVivencial1406)
+
 ---
 
 ## M2 - Transformações
@@ -28,6 +32,14 @@ Trabalho Jogo das Cores
 Trabalho de texturizações
 
 [➡️ Trabalho texturizações](./src/Texturizacoes/)
+
+---
+
+## M5 - Sprites
+
+Trabalho de texturizações
+
+[➡️ Trabalho texturizações](./src/Sprites/)
 
 ---
 
