@@ -49,6 +49,8 @@ set(EXERCISES
     AtividadesVivenciais/AtividadeVivencial3105
     JogoDasCores/M3JogoCores
     Texturizacoes/Texturizacoes
+    Sprites/Sprites
+    AtividadesVivenciais/AtividadeVivencial1406/AtividadeVivencial1406
 )
 
 add_compile_options(-Wno-pragmas)
