@@ -32,7 +32,7 @@ const GLchar* vertexShaderSource = R"(
     uniform mat4 projection;
 
     void main() {
-        TexCoord = texCoord; // Passa a coordenada de textura diretamente
+        TexCoord = texCoord;
         gl_Position = projection * model * vec4(position, 1.0);
     }
 )";
@@ -40,11 +40,11 @@ const GLchar* vertexShaderSource = R"(
 const GLchar* fragmentShaderSource = R"(
     #version 400
     in vec2 TexCoord;
-    out vec4 FragColor;
+    out vec4 color;
     uniform sampler2D tex_buff;
 
     void main() {
-        FragColor = texture(tex_buff, TexCoord);
+        color = texture(tex_buff, TexCoord);
     }
 )";
 
@@ -60,16 +60,16 @@ public:
     Sprite(const string& texturePath) {
         this->VAO = setupSprite();
         this->textureID = loadTexture(texturePath);
-        this->position = vec2(0.0f);
-        this->size = vec2(1.0f);
-        this->rotation = 0.0f;
+        this->position = vec2(0.0);
+        this->size = vec2(1.0);
+        this->rotation = 0.0;
     }
 
     void Draw(GLuint shaderProgram) {
-        mat4 model = mat4(1.0f);
-        model = translate(model, vec3(position, 0.0f));
-        model = rotate(model, radians(rotation), vec3(0.0f, 0.0f, 1.0f));
-        model = scale(model, vec3(size, 1.0f));
+        mat4 model = mat4(1.0);
+        model = translate(model, vec3(position, 0.0));
+        model = rotate(model, radians(rotation), vec3(0.0, 0.0, 1.0));
+        model = scale(model, vec3(size, 1.0));
 
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, value_ptr(model));
         
@@ -109,7 +109,7 @@ int setupShader() {
 int setupSprite() {
     GLfloat vertices[] = {
         -0.5,  0.5, 0.0,  0.0, 1.0,
-        -0.5, -0.5, 0.0,  0.0f, 0.0,
+        -0.5, -0.5, 0.0,  0.0, 0.0,
          0.5,  0.5, 0.0,  1.0, 1.0,
          0.5, -0.5, 0.0,  1.0, 0.0
     };
@@ -174,7 +174,7 @@ int main() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Cenário com Orientação Correta", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Texturizacoes", NULL, NULL);
     glfwMakeContextCurrent(window);
     glfwSetKeyCallback(window, key_callback);
 
@@ -205,8 +205,8 @@ int main() {
 
     glUseProgram(shaderProgram);
     
-    mat4 projection = ortho(0.0f, (float)WIDTH, 0.0f, (float)HEIGHT, -1.0f, 1.0f);
-    
+    mat4 projection = ortho(0.0, 800.0, 0.0, 600.0, -1.0, 1.0);
+
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, value_ptr(projection));
     glUniform1i(glGetUniformLocation(shaderProgram, "tex_buff"), 0);
 
