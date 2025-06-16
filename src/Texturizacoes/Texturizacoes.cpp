@@ -47,7 +47,7 @@ const GLchar *fragmentShaderSource = R"(
 	 color = texture(tex_buff,tex_coord);
  }
  )";
- 
+
 class Sprite {
 private:
     GLuint VAO;
@@ -119,7 +119,7 @@ int main() {
     sprites[3].SetPosition(vec2(650, 150)); sprites[3].SetSize(vec2(200, 150));
     sprites[4].SetPosition(vec2(400, 500)); sprites[4].SetSize(vec2(800, 200));
     sprites[5].SetPosition(vec2(200, 400)); sprites[5].SetSize(vec2(100, 100));
-    sprites[6].SetPosition(vec2(600, 400)); sprites[6].SetSize(vec2(100, 100));
+    sprites[6].SetPosition(vec2(600, 585)); sprites[6].SetSize(vec2(80, 80));
 
     glUseProgram(shaderProgram);
     
