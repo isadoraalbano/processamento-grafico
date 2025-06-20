@@ -39,7 +39,7 @@ Trabalho de texturizações
 
 Trabalho de texturizações
 
-[➡️ Trabalho texturizações](./src/Sprites/)
+[➡️ Trabalho Sprites animados](./src/Sprites/)
 
 ---
 
