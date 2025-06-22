@@ -6,10 +6,10 @@ Repositório das entregas da disciplina de Processamento Gráfico
 [➡️ Atividades vivenciais](./src/AtividadesVivenciais/)
 
 ### Atividade 31/05
-[➡️ Atividades vivencial 31/05](./src/AtividadesVivenciais/AtividadeVivencial3105)
+[➡️ Atividade vivencial 31/05](./src/AtividadesVivenciais/AtividadeVivencial3105)
 
 ### Atividade 14/06
-[➡️ Atividades vivencial 14/06](./src/AtividadesVivenciais/AtividadeVivencial1406)
+[➡️ Atividade vivencial 14/06](./src/AtividadesVivenciais/AtividadeVivencial1406)
 
 ---
 
