@@ -38,7 +38,9 @@ struct Sprite
 int setupShader();
 int setupSprite();
 int loadTexture(string filePath);
+Sprite createSprite(vec3 position, vec3 dimensions, GLuint texID);
 
+// Dimensões da janela
 const GLuint WIDTH = 800, HEIGHT = 600;
 
 // Código fonte do Vertex Shader (em GLSL): ainda hardcoded
@@ -108,55 +110,14 @@ int main()
 
 	vector<Sprite> sprites;
 
-    	for (int i=0; i < 7; i++)
-        {
-            Sprite sprite;
-            sprite.VAO = setupSprite();
-            if(i == 0)
-            {
-                sprite.position = vec3(400, 300, 0); 
-                sprite.dimensions = vec3(800, 600, 1);
-                sprite.texID = loadTexture("../assets/sprites/sky.png");
-            }
-            if(i == 1)
-            {
-                sprite.position = vec3(400, 300, 0); 
-                sprite.dimensions = vec3(800, 600, 1);
-                sprite.texID = loadTexture("../assets/sprites/aurora.png");
-            }
-            if(i == 2)
-            {
-                sprite.position = vec3(150, 150, 0); 
-                sprite.dimensions = vec3(200, 150, 1);
-                sprite.texID = loadTexture("../assets/sprites/clouds_1.png");
-            }
-            if(i == 3)
-            {
-                sprite.position = vec3(650, 150, 0); 
-                sprite.dimensions = vec3(200, 150, 1);
-                sprite.texID = loadTexture("../assets/sprites/clouds_2.png");
-            }
-            if(i == 4)
-            {
-                sprite.position = vec3(400, 500, 0); 
-                sprite.dimensions = vec3(800, 200, 1);
-                sprite.texID = loadTexture("../assets/sprites/rocks_tex.png");
-            }
-            if(i == 5)
-            {
-                sprite.position = vec3(200, 400, 0); 
-                sprite.dimensions = vec3(100, 100, 1);
-                sprite.texID = loadTexture("../assets/sprites/coruja.png");
-            }
-            if(i == 6)
-            {
-                sprite.position = vec3(600, 585, 0); 
-                sprite.dimensions = vec3(80, 80, 1);
-                sprite.texID = loadTexture("../assets/sprites/vampirinho.png");
-            }   
-            sprites.push_back(sprite);
-        }
-
+    sprites.push_back(createSprite(vec3(400, 300, 0), vec3(800, 600, 1),loadTexture("../assets/sprites/sky.png")));
+    sprites.push_back(createSprite(vec3(400, 300, 0), vec3(800, 600, 1),loadTexture("../assets/sprites/aurora.png")));
+    sprites.push_back(createSprite(vec3(150, 150, 0), vec3(200, 150, 1),loadTexture("../assets/sprites/clouds_1.png")));
+    sprites.push_back(createSprite(vec3(650, 150, 0), vec3(200, 150, 1),loadTexture("../assets/sprites/clouds_2.png")));
+    sprites.push_back(createSprite(vec3(400, 500, 0), vec3(800, 200, 1),loadTexture("../assets/sprites/rocks_tex.png")));
+    sprites.push_back(createSprite(vec3(200, 400, 0), vec3(100, 100, 1),loadTexture("../assets/sprites/coruja.png")));
+    sprites.push_back(createSprite(vec3(600, 585, 0), vec3(80, 80, 1),loadTexture("../assets/sprites/vampirinho.png")));
+                
 	glUseProgram(shaderID);
 
 	float colorValue = 0.0;
@@ -317,41 +278,35 @@ int setupSprite()
 		};
 
 	GLuint VBO, VAO;
-	// Geração do identificador do VBO
 	glGenBuffers(1, &VBO);
-	// Faz a conexão (vincula) do buffer como um buffer de array
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	// Envia os dados do array de floats para o buffer da OpenGl
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-	// Geração do identificador do VAO (Vertex Array Object)
 	glGenVertexArrays(1, &VAO);
-	// Vincula (bind) o VAO primeiro, e em seguida  conecta e seta o(s) buffer(s) de vértices
-	// e os ponteiros para os atributos
 	glBindVertexArray(VAO);
-	// Para cada atributo do vertice, criamos um "AttribPointer" (ponteiro para o atributo), indicando:
-	//  Localização no shader * (a localização dos atributos devem ser correspondentes no layout especificado no vertex shader)
-	//  Numero de valores que o atributo tem (por ex, 3 coordenadas xyz)
-	//  Tipo do dado
-	//  Se está normalizado (entre zero e um)
-	//  Tamanho em bytes
-	//  Deslocamento a partir do byte zero
 
-	// Ponteiro pro atributo 0 - Posição - coordenadas x, y, z
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid *)0);
 	glEnableVertexAttribArray(0);
 
-	// Ponteiro pro atributo 1 - Coordenada de textura s, t
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid *)(3 * sizeof(GLfloat)));
 	glEnableVertexAttribArray(1);
 
-	// Observe que isso é permitido, a chamada para glVertexAttribPointer registrou o VBO como o objeto de buffer de vértice
-	// atualmente vinculado - para que depois possamos desvincular com segurança
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	// Desvincula o VAO (é uma boa prática desvincular qualquer buffer ou array para evitar bugs medonhos)
 	glBindVertexArray(0);
 
 	return VAO;
+
+}
+
+Sprite createSprite(vec3 position, vec3 dimensions, GLuint texID)
+{
+    Sprite sprite;
+
+	sprite.position = position;
+	sprite.dimensions = dimensions;
+	sprite.VAO = setupSprite();
+	sprite.texID = texID;
+
+    return sprite;
 
 }
