@@ -1,20 +1,40 @@
 #include <iostream>
-#include <vector>
 #include <string>
+#include <assert.h>
+#include <cmath>
+#include <vector>
 
+using namespace std;
+
+// GLAD
 #include <glad/glad.h>
+
+// GLFW
 #include <GLFW/glfw3.h>
+
+// STB_IMAGE
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+
+// GLM
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
-
-using namespace std;
 using namespace glm;
 
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
+// Protótipo da função de callback de teclado
+void key_callback(GLFWwindow *window, int key, int scancode, int action, int mode);
+
+struct Sprite
+{
+	vec3 position;
+	vec3 dimensions;
+	GLuint VAO;
+	GLuint texID;
+};
+
+// Protótipos das funções
 int setupShader();
 int setupSprite();
 int loadTexture(string filePath);
@@ -48,181 +68,290 @@ const GLchar *fragmentShaderSource = R"(
  }
  )";
 
-class Sprite {
-private:
-    GLuint VAO;
-    GLuint textureID;
-    vec2 position;
-    vec2 size;
-    float rotation;
+int main()
+{
+	glfwInit();
 
-public:
-    Sprite(const string& texturePath) {
-        this->VAO = setupSprite();
-        this->textureID = loadTexture(texturePath);
-        this->position = vec2(0.0);
-        this->size = vec2(1.0);
-        this->rotation = 0.0;
-    }
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    void Draw(GLuint shaderProgram) {
-        mat4 model = mat4(1.0);
-        model = translate(model, vec3(position, 0.0));
-        model = rotate(model, radians(rotation), vec3(0.0, 0.0, 1.0));
-        model = scale(model, vec3(size, 1.0));
+	glfwWindowHint(GLFW_SAMPLES, 8);
 
-        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, value_ptr(model));
-        
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, textureID);
-        
-        glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-        glBindVertexArray(0);
-    }
+	// Criação da janela GLFW
+	GLFWwindow *window = glfwCreateWindow(WIDTH, HEIGHT, "Texturizacoes", nullptr, nullptr);
+	if (!window)
+	{
+		std::cerr << "Falha ao criar a janela GLFW" << std::endl;
+		glfwTerminate();
+		return -1;
+	}
+	glfwMakeContextCurrent(window);
 
-    void SetPosition(vec2 pos) { position = pos; }
-    void SetSize(vec2 s) { size = s; }
-    void SetRotation(float rot) { rotation = rot; }
-};
+	// Fazendo o registro da função de callback para a janela GLFW
+	glfwSetKeyCallback(window, key_callback);
 
-int main() {
-    glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	// GLAD: carrega todos os ponteiros d funções da OpenGL
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+	{
+		std::cerr << "Falha ao inicializar GLAD" << std::endl;
+		return -1;
+	}
 
-    GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Texturizacoes", NULL, NULL);
-    glfwMakeContextCurrent(window);
-    glfwSetKeyCallback(window, key_callback);
+	int width, height;
+	glfwGetFramebufferSize(window, &width, &height);
+	glViewport(0, 0, width, height);
 
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-        cout << "Failed to initialize GLAD" << endl;
-        return -1;
-    }
+	// Compilando e buildando o programa de shader
+	GLuint shaderID = setupShader();
 
-    GLuint shaderProgram = setupShader();
-    
-    vector<Sprite> sprites = {
-        Sprite("../assets/sprites/sky_back.png"),
-        Sprite("../assets/sprites/aurora.png"),
-        Sprite("../assets/sprites/clouds_1.png"),
-        Sprite("../assets/sprites/clouds_2.png"),
-        Sprite("../assets/sprites/rocks_tex.png"),
-        Sprite("../assets/sprites/coruja.png"),
-        Sprite("../assets/sprites/vampirinho.png")
-    };
+	vector<Sprite> sprites;
 
-    sprites[0].SetPosition(vec2(400, 300)); sprites[0].SetSize(vec2(800, 600));
-    sprites[1].SetPosition(vec2(400, 300)); sprites[1].SetSize(vec2(800, 600));
-    sprites[2].SetPosition(vec2(150, 100)); sprites[2].SetSize(vec2(200, 150));
-    sprites[3].SetPosition(vec2(650, 150)); sprites[3].SetSize(vec2(200, 150));
-    sprites[4].SetPosition(vec2(400, 500)); sprites[4].SetSize(vec2(800, 200));
-    sprites[5].SetPosition(vec2(200, 400)); sprites[5].SetSize(vec2(100, 100));
-    sprites[6].SetPosition(vec2(600, 585)); sprites[6].SetSize(vec2(80, 80));
-
-    glUseProgram(shaderProgram);
-    
-    mat4 projection = ortho(0.0, 800.0, 600.0, 0.0, -1.0, 1.0);
-
-    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, value_ptr(projection));
-    glUniform1i(glGetUniformLocation(shaderProgram, "tex_buff"), 0);
-
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    while (!glfwWindowShouldClose(window)) {
-        glfwPollEvents();
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        for (auto& sprite : sprites) {
-            sprite.Draw(shaderProgram);
+    	for (int i=0; i < 7; i++)
+        {
+            Sprite sprite;
+            sprite.VAO = setupSprite();
+            if(i == 0)
+            {
+                sprite.position = vec3(400, 300, 0); 
+                sprite.dimensions = vec3(800, 600, 1);
+                sprite.texID = loadTexture("../assets/sprites/sky.png");
+            }
+            if(i == 1)
+            {
+                sprite.position = vec3(400, 300, 0); 
+                sprite.dimensions = vec3(800, 600, 1);
+                sprite.texID = loadTexture("../assets/sprites/aurora.png");
+            }
+            if(i == 2)
+            {
+                sprite.position = vec3(150, 150, 0); 
+                sprite.dimensions = vec3(200, 150, 1);
+                sprite.texID = loadTexture("../assets/sprites/clouds_1.png");
+            }
+            if(i == 3)
+            {
+                sprite.position = vec3(650, 150, 0); 
+                sprite.dimensions = vec3(200, 150, 1);
+                sprite.texID = loadTexture("../assets/sprites/clouds_2.png");
+            }
+            if(i == 4)
+            {
+                sprite.position = vec3(400, 500, 0); 
+                sprite.dimensions = vec3(800, 200, 1);
+                sprite.texID = loadTexture("../assets/sprites/rocks_tex.png");
+            }
+            if(i == 5)
+            {
+                sprite.position = vec3(200, 400, 0); 
+                sprite.dimensions = vec3(100, 100, 1);
+                sprite.texID = loadTexture("../assets/sprites/coruja.png");
+            }
+            if(i == 6)
+            {
+                sprite.position = vec3(600, 585, 0); 
+                sprite.dimensions = vec3(80, 80, 1);
+                sprite.texID = loadTexture("../assets/sprites/vampirinho.png");
+            }   
+            sprites.push_back(sprite);
         }
 
-        glfwSwapBuffers(window);
-    }
+	glUseProgram(shaderID);
 
-    glfwTerminate();
-    return 0;
+	float colorValue = 0.0;
+
+	glActiveTexture(GL_TEXTURE0);
+
+	glUniform1i(glGetUniformLocation(shaderID, "tex_buff"), 0);
+
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_ALWAYS);
+
+	glEnable(GL_BLEND);	
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	mat4 projection = ortho(0.0, 800.0, 600.0, 0.0, -1.0, 1.0);
+	glUniformMatrix4fv(glGetUniformLocation(shaderID, "projection"), 1, GL_FALSE, value_ptr(projection));
+
+	// Loop da aplicação - "game loop"
+	while (!glfwWindowShouldClose(window))
+	{
+		glfwPollEvents();
+
+		// Limpa o buffer de cor
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // cor de fundo
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		glLineWidth(10);
+		glPointSize(20);
+
+		for (Sprite &sprite : sprites)
+		{
+			mat4 model = mat4(1);
+			model = translate(model, sprite.position);
+			model = scale(model, sprite.dimensions);
+			glUniformMatrix4fv(glGetUniformLocation(shaderID, "model"), 1, GL_FALSE, value_ptr(model));
+
+			glBindVertexArray(sprite.VAO);
+			glBindTexture(GL_TEXTURE_2D, sprite.texID);
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		}
+
+		// Troca os buffers da tela
+		glfwSwapBuffers(window);
+	}
+	// Pede pra OpenGL desalocar os buffers
+	for (Sprite &sprite : sprites)
+	{
+		glDeleteVertexArrays(1, &sprite.VAO);
+	}
+
+	// Finaliza a execução da GLFW, limpando os recursos alocados por ela
+	glfwTerminate();
+	return 0;
 }
 
-int setupShader() {
-    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-    glCompileShader(vertexShader);
-
-    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-    glCompileShader(fragmentShader);
-
-    GLuint shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
-
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
-
-    return shaderProgram;
+void key_callback(GLFWwindow *window, int key, int scancode, int action, int mode)
+{
+	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+		glfwSetWindowShouldClose(window, GL_TRUE);
 }
 
-int setupSprite() {
-    GLfloat vertices[] = {
-        -0.5,  0.5, 0.0,  0.0, 1.0,
-        -0.5, -0.5, 0.0,  0.0, 0.0,
-         0.5,  0.5, 0.0,  1.0, 1.0,
-         0.5, -0.5, 0.0,  1.0, 0.0
-    };
-
-    GLuint VBO, VAO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-
-    glBindVertexArray(VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
-    glEnableVertexAttribArray(1);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-
-    return VAO;
-}
-
-int loadTexture(string filePath) {
-    GLuint texID;
-    glGenTextures(1, &texID);
-    glBindTexture(GL_TEXTURE_2D, texID);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+int setupShader()
+{
+	// Vertex shader
+	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
+	glCompileShader(vertexShader);
     
-    int width, height, nrChannels;
-    unsigned char* data = stbi_load(filePath.c_str(), &width, &height, &nrChannels, 0);
+	GLint success;
+	GLchar infoLog[512];
+	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+	if (!success)
+	{
+		glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
+		std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n"
+				  << infoLog << std::endl;
+	}
+	// Fragment shader
+	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+	glCompileShader(fragmentShader);
+	// Checando erros de compilação (exibição via log no terminal)
+	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+	if (!success)
+	{
+		glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
+		std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n"
+				  << infoLog << std::endl;
+	}
 
-    if (data) {
-        GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    } else {
-        cout << "Failed to load texture: " << filePath << endl;
-    }
-    stbi_image_free(data);
-    glBindTexture(GL_TEXTURE_2D, 0);
+	GLuint shaderProgram = glCreateProgram();
+	glAttachShader(shaderProgram, vertexShader);
+	glAttachShader(shaderProgram, fragmentShader);
+	glLinkProgram(shaderProgram);
+	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+	if (!success)
+	{
+		glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+		std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n"
+				  << infoLog << std::endl;
+	}
+	glDeleteShader(vertexShader);
+	glDeleteShader(fragmentShader);
 
-    return texID;
+	return shaderProgram;
 }
 
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode) {
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, GL_TRUE);
+int loadTexture(string filePath)
+{
+	GLuint texID;
+
+	// Gera o identificador da textura na memória
+	glGenTextures(1, &texID);
+	glBindTexture(GL_TEXTURE_2D, texID);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	int width, height, nrChannels;
+
+	unsigned char *data = stbi_load(filePath.c_str(), &width, &height, &nrChannels, 0);
+
+	if (data)
+	{
+		if (nrChannels == 3) // jpg, bmp
+		{
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		}
+		else // png
+		{
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		}
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+	{
+		std::cout << "Failed to load texture" << std::endl;
+	}
+
+	stbi_image_free(data);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	return texID;
 }
 
+int setupSprite()
+{
+	GLfloat vertices[] = {
+		// x   y    z    s     t
+		-0.5,  0.5, 0.0, 0.0, 1.0, //V0
+		-0.5, -0.5, 0.0, 0.0, 0.0, //V1
+		 0.5,  0.5, 0.0, 1.0, 1.0, //V2
+		 0.5, -0.5, 0.0, 1.0, 0.0  //V3
+		};
+
+	GLuint VBO, VAO;
+	// Geração do identificador do VBO
+	glGenBuffers(1, &VBO);
+	// Faz a conexão (vincula) do buffer como um buffer de array
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	// Envia os dados do array de floats para o buffer da OpenGl
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+	// Geração do identificador do VAO (Vertex Array Object)
+	glGenVertexArrays(1, &VAO);
+	// Vincula (bind) o VAO primeiro, e em seguida  conecta e seta o(s) buffer(s) de vértices
+	// e os ponteiros para os atributos
+	glBindVertexArray(VAO);
+	// Para cada atributo do vertice, criamos um "AttribPointer" (ponteiro para o atributo), indicando:
+	//  Localização no shader * (a localização dos atributos devem ser correspondentes no layout especificado no vertex shader)
+	//  Numero de valores que o atributo tem (por ex, 3 coordenadas xyz)
+	//  Tipo do dado
+	//  Se está normalizado (entre zero e um)
+	//  Tamanho em bytes
+	//  Deslocamento a partir do byte zero
+
+	// Ponteiro pro atributo 0 - Posição - coordenadas x, y, z
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid *)0);
+	glEnableVertexAttribArray(0);
+
+	// Ponteiro pro atributo 1 - Coordenada de textura s, t
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid *)(3 * sizeof(GLfloat)));
+	glEnableVertexAttribArray(1);
+
+	// Observe que isso é permitido, a chamada para glVertexAttribPointer registrou o VBO como o objeto de buffer de vértice
+	// atualmente vinculado - para que depois possamos desvincular com segurança
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	// Desvincula o VAO (é uma boa prática desvincular qualquer buffer ou array para evitar bugs medonhos)
+	glBindVertexArray(0);
+
+	return VAO;
+
+}
